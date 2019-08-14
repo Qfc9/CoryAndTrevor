@@ -1,12 +1,12 @@
 CPPFLAGS += -Wall -Wextra -Wpedantic
-CPPFLAGS += -D_XOPEN_SOURCE -pthread -std=c11 -DDEBUG -g
+CPPFLAGS += -D_XOPEN_SOURCE -pthread -std=c11 -lm -lc  -DDEBUG -g
 ARFLAGS += -U
 
 DEBUG = -DDEBUG -g
 
 BINS = ricky
 
-FILES = main.o
+FILES = main.o lib/graph.o lib/listener.o lib/util.o
 all: build
 
 .PHONY: all

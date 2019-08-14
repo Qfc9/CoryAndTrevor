@@ -24,44 +24,31 @@
 // Opens a socket and listens for incoming connections, spins off new threads for new connections
 void *listener(void *data)
 {
-    int sockfd;
-    char buffer[MAXLINE];
-    char *hello = "Hello from server";
-    struct sockaddr_in servaddr, cliaddr;
+  char buffer[100];
+  char *message = "Hello Client";
+  int listenfd, len;
+  struct sockaddr_in servaddr, cliaddr;
+  bzero(&servaddr, sizeof(servaddr));
 
-    // Creating socket file descriptor
-    if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
-        perror("socket creation failed");
-        exit(EXIT_FAILURE);
-    }
+  // Create a UDP Socket
+  listenfd = socket(AF_INET, SOCK_DGRAM, 0);
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(PORT);
+  servaddr.sin_family = AF_INET;
 
-    memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
+  // bind server address to socket descriptor
+  bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
 
-    // Filling server information
-    servaddr.sin_family    = AF_INET; // IPv4
-    servaddr.sin_addr.s_addr = INADDR_ANY;
-    servaddr.sin_port = htons(PORT);
+  //receive the datagram
+  len = sizeof(cliaddr);
+  int n = recvfrom(listenfd, buffer, sizeof(buffer),
+          0, (struct sockaddr*)&cliaddr,&len); //receive message from server
+  buffer[n] = '\0';
+  puts(buffer);
 
-    // Bind the socket with the server address
-    if ( bind(sockfd, (const struct sockaddr *)&servaddr,
-            sizeof(servaddr)) < 0 )
-    {
-        perror("bind failed");
-        exit(EXIT_FAILURE);
-    }
-
-    int n;
-    socklen_t len;
-    n = recvfrom(sockfd, (char *)buffer, MAXLINE,
-                MSG_WAITALL, ( struct sockaddr *) &cliaddr,
-                &len);
-    buffer[n] = '\0';
-    printf("Client : %s\n", buffer);
-    sendto(sockfd, (const char *)hello, strlen(hello),
-        MSG_DONTWAIT, (const struct sockaddr *) &cliaddr,
-            len);
-    printf("Hello message sent.\n");
+  // send the response
+  sendto(listenfd, message, MAXLINE, 0,
+        (struct sockaddr*)&cliaddr, sizeof(cliaddr)); 
 
     return 0;
 }

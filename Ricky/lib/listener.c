@@ -26,7 +26,7 @@ void *listener(void *data)
 {
   char buffer[100];
   char *message = "Hello Client";
-  int listenfd, len;
+  uint listenfd, len;
   struct sockaddr_in servaddr, cliaddr;
   bzero(&servaddr, sizeof(servaddr));
 
@@ -39,16 +39,16 @@ void *listener(void *data)
   // bind server address to socket descriptor
   bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
 
-  //receive the datagram
-  len = sizeof(cliaddr);
-  int n = recvfrom(listenfd, buffer, sizeof(buffer),
-          0, (struct sockaddr*)&cliaddr,&len); //receive message from server
-  buffer[n] = '\0';
-  puts(buffer);
-
-  // send the response
-  sendto(listenfd, message, MAXLINE, 0,
-        (struct sockaddr*)&cliaddr, sizeof(cliaddr)); 
+  while (1) {
+    //receive the datagram
+    len = sizeof(cliaddr);
+    int n = recvfrom(listenfd, buffer, sizeof(buffer),
+            0, (struct sockaddr*)&cliaddr,&len); //receive message from server
+    buffer[n] = '\0';
+    puts(buffer);
+    printf("%s\n", inet_ntoa(cliaddr.sin_addr));
+    printf("%u\n", ntohs(cliaddr.sin_port));
+  }
 
     return 0;
 }

@@ -40,9 +40,8 @@ void *ping(void *data)
       // request to send datagram
       // no need to specify server address in sendto
       // connect stores the peers IP and port
-      sendto(sockfd, message, MAXLINE, 0, (struct sockaddr*)NULL, sizeof(servaddr));
-      printf("%u\n", ntohs(servaddr.sin_port));
-
+      sendto(sockfd, data, MAXLINE, 0, (struct sockaddr*)NULL, sizeof(servaddr));
+      
       // close the descriptor
       close(sockfd);    }
 }

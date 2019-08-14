@@ -6,7 +6,7 @@ DEBUG = -DDEBUG -g
 
 BINS = coryAndTrevor
 
-FILES = main.o lib/ping.o
+FILES = main.o lib/ping.o lib/listener.o
 all: build
 
 .PHONY: all

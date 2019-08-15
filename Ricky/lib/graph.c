@@ -17,6 +17,7 @@ static void _graphResetNodes(struct _node *n);
 static void _graphSize(struct _node *n, uint32_t *size);
 static void _graph_remove_node(graph g, struct _node *n, struct _node *past_n);
 static void _graph_monitor(graph g, struct _node *n, struct _node *past_n);
+static void _graph_print(struct _node *n);
 
 // Creating Graph
 graph graphCreate(void)
@@ -26,6 +27,21 @@ graph graphCreate(void)
     g->type = BST;
 
     return g;
+}
+
+void graph_print(graph g){
+  _graph_print(g->nodes);
+}
+
+void _graph_print(struct _node *n){
+  if (n == NULL) {
+    return;
+  }
+
+  printf("%s\n", n->data.ip_addr);
+  printf("%s\n\n", n->data.port);
+
+  _graph_print(n->next);
 }
 
 void *graphMonitor(void *data){
@@ -118,8 +134,8 @@ void graphAddNode(graph g, char *ip_addr, char *port, size_t lastPing)
         g->nodes->visited = false;
         g->nodes->parent = NULL;
 
-        printf("%s\n", g->nodes->data.ip_addr);
-        printf("%s\n", g->nodes->data.port);
+        // printf("%s\n", g->nodes->data.ip_addr);
+        // printf("%s\n", g->nodes->data.port);
 
         return;
     }

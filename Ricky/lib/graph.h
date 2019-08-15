@@ -44,7 +44,7 @@ struct _node;
 
 graph graphCreate(void);
 void graphAddNode(graph g, char *ip_addr, char *port, size_t lastPing);
-void graphPrint(graph g);
+void graph_print(graph g);
 void *graphMonitor(void *data);
 bool graphUpdate(graph g, char *ip_addr, char *port, size_t lastPing);
 void graph_add_edge(graph g, uint32_t n1, uint32_t n2);
@@ -54,6 +54,7 @@ void graphDestroy(graph g);
 void graph_calculate_edges(graph g);
 void graph_mark(struct _node *n_list, struct _node *n);
 
+struct _node *graph_find_by_idx(graph g, uint32_t idx);
 struct _node *_graph_find(struct _node *n, char *port, char *ip_addr);
 void graph_replace_edges(struct _node *rem_n, struct _node *cur_n);
 unsigned int graph_evaluate(struct _node *n);

@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <signal.h>
+#include <strings.h>
 
 #include "lib/graph.h"
+#include "lib/sender.h"
 #include "lib/listener.h"
 
 int main(void) {
   /* code */
   graph g = graphCreate();
-  char done[16];
+  char input[16];
 
   // Thread init
   pthread_t listener_thread;
@@ -22,9 +24,25 @@ int main(void) {
   pthread_create(&monitoring_thread, &attr, graphMonitor, g);
 
   // Printing and waiting for an enter to end
-  printf("Server Online...\n");
-  printf("Press enter to close the server...\n");
-  scanf("%s", done);
+  printf("Ricky is Online...\n");
+  while (strncmp("q\0", input, 2) != 0) {
+    printf("--- MENU ---\n");
+    printf("1 - send payload\n");
+    printf("l - list slaves\n");
+    printf("q - end program\n");
+    printf("> ");
+    scanf("%s", input);
+
+    if (strncmp("l\0", input, 2) == 0) {
+      graph_print(g);
+    }
+    else if (strncmp("1\0", input, 2) == 0) {
+      test_send(graph_find_by_idx(g, 1));
+    }
+
+  }
+
+  printf("Killing Ricky\n");
 
   // Killing all the threads
   pthread_kill(listener_thread, SIGINT);

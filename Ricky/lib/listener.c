@@ -52,11 +52,10 @@ void *listener(void *data)
 
     if (graphUpdate(data, ip_addr, buffer, time(NULL)) == false) {
       graphAddNode(data, ip_addr, buffer, time(NULL));
-      printf("ADD\n" );
     }
-    uint32_t size = 0;
-    graphSize(data, &size);
-    printf("%u\n", size);
+    // uint32_t size = 0;
+    // graphSize(data, &size);
+    // printf("%u\n", size);
 
   }
 

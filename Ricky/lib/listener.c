@@ -16,6 +16,8 @@
 #include <netinet/in.h>
 
 #include "util.h"
+#include "graph.h"
+#include "../../lib/layout.h"
 #include "listener.h"
 
 #define PORT     8080
@@ -24,8 +26,7 @@
 // Opens a socket and listens for incoming connections, spins off new threads for new connections
 void *listener(void *data)
 {
-  char buffer[100];
-  char *message = "Hello Client";
+  char buffer[16];
   uint listenfd, len;
   struct sockaddr_in servaddr, cliaddr;
   bzero(&servaddr, sizeof(servaddr));
@@ -44,10 +45,19 @@ void *listener(void *data)
     len = sizeof(cliaddr);
     int n = recvfrom(listenfd, buffer, sizeof(buffer),
             0, (struct sockaddr*)&cliaddr,&len); //receive message from server
-    buffer[n] = '\0';
-    puts(buffer);
-    printf("%s\n", inet_ntoa(cliaddr.sin_addr));
-    printf("%u\n", ntohs(cliaddr.sin_port));
+    buffer[n-1] = '\0';
+
+    char *ip_addr = inet_ntoa(cliaddr.sin_addr);
+
+
+    if (graphUpdate(data, ip_addr, buffer, time(NULL)) == false) {
+      graphAddNode(data, ip_addr, buffer, time(NULL));
+      printf("ADD\n" );
+    }
+    uint32_t size = 0;
+    graphSize(data, &size);
+    printf("%u\n", size);
+
   }
 
     return 0;

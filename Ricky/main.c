@@ -11,13 +11,15 @@ int main(void) {
   char done[16];
 
   // Thread init
-  pthread_t thread;
+  pthread_t listener_thread;
+  pthread_t monitoring_thread;
   pthread_attr_t  attr;
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-  pthread_create(&thread, &attr, listener, g);
+  pthread_create(&listener_thread, &attr, listener, g);
+  pthread_create(&monitoring_thread, &attr, graphMonitor, g);
 
   // Printing and waiting for an enter to end
   printf("Server Online...\n");
@@ -25,7 +27,8 @@ int main(void) {
   scanf("%s", done);
 
   // Killing all the threads
-  pthread_kill(thread, SIGINT);
+  pthread_kill(listener_thread, SIGINT);
+  pthread_kill(monitoring_thread, SIGINT);
 
   // Freeing
   pthread_attr_destroy(&attr);

@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <time.h>
 
 #include <arpa/inet.h>
 
@@ -12,6 +14,9 @@
 static void _graphDestoryNodes(struct _node *n);
 static void _graphResetNodes(struct _node *n);
 static void _graphResetNodes(struct _node *n);
+static void _graphSize(struct _node *n, uint32_t *size);
+static void _graph_remove_node(graph g, struct _node *n, struct _node *past_n);
+static void _graph_monitor(graph g, struct _node *n, struct _node *past_n);
 
 // Creating Graph
 graph graphCreate(void)
@@ -23,7 +28,48 @@ graph graphCreate(void)
     return g;
 }
 
-void graph_size(struct _node *n, uint32_t *size)
+void *graphMonitor(void *data){
+  graph g = (graph) data;
+  while (1) {
+    sleep(5);
+    _graph_monitor(g, g->nodes, NULL);
+  }
+}
+
+void _graph_monitor(graph g, struct _node *n, struct _node *past_n)
+{
+  if (n == NULL) {
+    return;
+  }
+
+  if (n->data.lastPing < (size_t) time(NULL) - 10) {
+    _graph_remove_node(g, n, past_n);
+  }
+
+  _graph_monitor(g, n->next, n);
+}
+
+void _graph_remove_node(graph g, struct _node *n, struct _node *past_n)
+{
+  if (n == NULL) {
+    return;
+  }
+
+  if (past_n == NULL) {
+    g->nodes = n->next;
+    free(n);
+    return;
+  }
+
+  past_n->next = n->next;
+  free(n);
+}
+
+void graphSize(graph g, uint32_t *size){
+    _graphSize(g->nodes, size);
+}
+
+void _graphSize(struct _node *n, uint32_t *size)
 {
     if (!n)
     {
@@ -31,7 +77,7 @@ void graph_size(struct _node *n, uint32_t *size)
     }
 
     (*size)++;
-    graph_size(n->next, size);
+    _graphSize(n->next, size);
 
     return;
 }
@@ -52,7 +98,7 @@ void graph_add_existing_node(struct _node *n, struct _node *new_n)
 }
 
 // Adding a node to the graph
-void graphAddNode(graph g, uint32_t value)
+void graphAddNode(graph g, char *ip_addr, char *port, size_t lastPing)
 {
     if(!g)
     {
@@ -66,14 +112,22 @@ void graphAddNode(graph g, uint32_t value)
         {
             return;
         }
-        // g->nodes->data.value = value;
+        strncpy(g->nodes->data.ip_addr, ip_addr, sizeof(ip_addr)+1);
+        strncpy(g->nodes->data.port, port, sizeof(port)+1);
+        g->nodes->data.lastPing = lastPing;
         g->nodes->visited = false;
         g->nodes->parent = NULL;
+
+        printf("%s\n", g->nodes->data.ip_addr);
+        printf("%s\n", g->nodes->data.port);
+
         return;
     }
 
     struct _node *newNode = calloc(1, sizeof(_node));
-    // newNode->data.value = value;
+    strncpy(newNode->data.ip_addr, ip_addr, sizeof(ip_addr)+1);
+    strncpy(newNode->data.port, port, sizeof(port)+1);
+    newNode->data.lastPing = lastPing;
     newNode->visited = false;
     newNode->parent = NULL;
 
@@ -117,20 +171,37 @@ void graphDestroy(graph g)
     free(g);
 }
 
+bool graphUpdate(graph g, char *ip_addr, char *port, size_t lastPing)
+{
+  struct _node *n = _graph_find(g->nodes, ip_addr, port);
+
+  if (n != NULL) {
+    n->data.lastPing = lastPing;
+    return true;
+  }
+
+  return false;
+}
+
 // Find a certain node
-struct _node *_graph_find(struct _node *n, struct _node *find_n)
+struct _node *_graph_find(struct _node *n, char *ip_addr, char *port)
 {
     if(!n)
     {
         return NULL;
     }
 
-    if(n == find_n)
-    {
-        return n;
-    }
+    // if (sizeof(n->data.port) == sizeof(port) && sizeof(n->data.ip_addr) == sizeof(ip_addr)) {
+      // printf("%s %s\n", n->data.port, port);
+      // printf("%s %s\n", n->data.ip_addr, ip_addr);
+      // printf("%u %u\n", strcmp(n->data.port, port), strcmp(n->data.ip_addr, ip_addr));
+      if(strcmp(n->data.port, port) == 0 && strcmp(n->data.ip_addr, ip_addr) == 0)
+      {
+          return n;
+      }
+    // }
 
-    return _graph_find(n->next, find_n);
+    return _graph_find(n->next, ip_addr, port);
 }
 
 // Settings all nodes to false

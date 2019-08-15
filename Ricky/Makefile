@@ -6,7 +6,7 @@ DEBUG = -DDEBUG -g
 
 BINS = ricky
 
-FILES = main.o lib/graph.o lib/listener.o lib/util.o
+FILES = main.o lib/graph.o lib/listener.o lib/util.o ../lib/layout.o
 all: build
 
 .PHONY: all
@@ -27,7 +27,7 @@ build: $(FILES)
 	$(MAKE) clean
 
 clean:
-	$(RM) *.o
+	$(RM) *.o lib/*.o ../lib/*.o
 
 cleanAll:
-	$(RM) $(BINS) *.o
+	$(RM) $(BINS) *.o lib/*.o ../lib/*.o

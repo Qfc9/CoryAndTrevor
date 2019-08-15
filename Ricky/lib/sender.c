@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <dlfcn.h>
 
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -56,12 +57,45 @@ void test_send(struct _node *n){
   // Freeing the results
   freeaddrinfo(results);
 
+  /* declare a file pointer */
+  FILE    *infile;
+  char    *buffer;
+  long    numbytes;
+
+  /* open an existing file for reading */
+  infile = fopen("../payloads/lib.so", "r");
+
+  /* quit if the file does not exist */
+  if(infile == NULL)
+      return;
+
+  /* Get the number of bytes */
+  fseek(infile, 0L, SEEK_END);
+  numbytes = ftell(infile);
+
+  /* reset the file position indicator to
+  the beginning of the file */
+  fseek(infile, 0L, SEEK_SET);
+
+  /* grab sufficient memory for the
+  buffer to hold the text */
+  buffer = (char*)calloc(numbytes, sizeof(char));
+
+  /* memory error */
+  if(buffer == NULL)
+      return;
+
+  /* copy all the text into the buffer */
+  fread(buffer, sizeof(char), numbytes, infile);
+  fclose(infile);
+
   struct base_layout payload;
   payload.version = 1;
-  payload.type = 1;
-  payload.payload_size = 0;
+  payload.type = 10;
+  payload.payload_size = numbytes;
 
   send(sd, &payload, sizeof(payload), 0);
+  send(sd, buffer, numbytes, 0);
 
   close(sd);
 }

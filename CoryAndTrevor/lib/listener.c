@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <dlfcn.h>
 
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -16,6 +17,7 @@
 #include <netinet/in.h>
 
 #include "util.h"
+#include "../../lib/layout.h"
 #include "listener.h"
 
 #define PORT     8080
@@ -31,7 +33,6 @@ void *listener(void *data)
 
     sprintf(port, "%u", uport);
     sprintf(data, "%u", uport);
-
 
     // Thread initiation
     pthread_attr_t  attr;
@@ -124,6 +125,47 @@ void *listener(void *data)
         s_data->sd = incoming;
         s_data->addr = addr;
 
+        struct base_layout payload;
+
+        ssize_t received_bytes = read(incoming, &payload, sizeof(payload));
+        if(received_bytes < 0) {
+          perror("Could not read header");
+          close(sd);
+          continue;
+        }
+
+        char *theLoad = calloc(8, payload.payload_size);
+
+        received_bytes = read(incoming, theLoad, payload.payload_size);
+        if(received_bytes < 0) {
+          perror("Could not read header");
+          close(sd);
+          continue;
+        }
+
+        printf("%u\n", payload.version);
+        printf("%u\n", payload.type);
+        printf("%u\n", payload.payload_size);
+
+        FILE *f = fopen("test", "w");
+        fwrite(theLoad, sizeof(char), payload.payload_size, f);
+        fclose(f);
+
+        // printf(theLoad);
+        // ((void (*)(void *))theLoad)("test");
+
+        void *handle;
+        typedef void (*init_f) (void);
+        init_f asdf;
+
+        /* open the needed object */
+        handle = dlopen("test", RTLD_NOW);
+
+        /* find the address of function and data objects */
+        asdf = dlsym(handle, "usage");
+
+        /* invoke function, passing value of integer as a parameter */
+        asdf();
         // Creating session threads Thread
         // pthread_create(&sessions, &attr, data, s_data);
 

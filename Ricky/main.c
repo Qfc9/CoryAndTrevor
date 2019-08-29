@@ -5,6 +5,7 @@
 
 #include "lib/graph.h"
 #include "lib/sender.h"
+#include "lib/options.h"
 #include "lib/listener.h"
 
 int main(void) {
@@ -37,7 +38,7 @@ int main(void) {
       graph_print(g);
     }
     else if (strncmp("1\0", input, 2) == 0) {
-      test_send(graph_find_by_idx(g, 1));
+      opt_send_library(g, "../payloads/lib.so");
     }
 
   }

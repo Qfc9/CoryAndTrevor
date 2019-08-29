@@ -6,7 +6,7 @@ DEBUG = -DDEBUG -g
 
 BINS = ricky
 
-FILES = main.o lib/graph.o lib/listener.o lib/util.o ../lib/layout.o lib/sender.o
+FILES = main.o lib/graph.o lib/listener.o lib/util.o ../lib/layout.o lib/sender.o lib/options.o
 all: build
 
 .PHONY: all

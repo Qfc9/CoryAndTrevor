@@ -13,6 +13,74 @@
 #include "../../lib/layout.h"
 #include "graph.h"
 
+static int _tcp_send(char *ip_addr, char *port);
+
+int send_library(struct _node *n, char *payload, ssize_t payload_size){
+
+  struct base_layout header;
+  header.version = 1;
+  header.type = 1;
+  header.payload_size = payload_size;
+
+  int sd = _tcp_send(n->data.ip_addr, n->data.port);
+  if (sd == -1) {
+    return 1;
+  }
+
+  send(sd, &header, sizeof(header), 0);
+  send(sd, payload, header.payload_size, 0);
+
+  close(sd);
+  return 0;
+}
+
+static int _tcp_send(char *ip_addr, char *port){
+  // Socket setup
+  struct addrinfo hints = {0};
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_PASSIVE;
+
+  // Getting socket info
+  struct addrinfo *results;
+  int err = getaddrinfo(ip_addr, port, &hints, &results);
+  if(err != 0) {
+      // fprintf(stderr, "Could not get address: %s\n", gai_strerror(err));
+      return -1;
+  }
+
+  // Establishing the socket
+  int sd = socket(results->ai_family, results->ai_socktype, 0);
+  if(sd < 0) {
+      perror("Could not establish socket");
+      freeaddrinfo(results);
+      return -1;
+  }
+
+  // Adding socket option for faster binding
+  int yes = 1;
+  err = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+  if(err < 0) {
+      perror("Unable to alter socket options");
+      close(sd);
+      return -1;
+  }
+
+  // Attempting to connect to dispatcher
+  err = connect(sd, results->ai_addr, results->ai_addrlen);
+  if(err < 0)
+  {
+      perror("Could not bind socket");
+      close(sd);
+      freeaddrinfo(results);
+      return -1;
+  }
+
+  // Freeing the results
+  freeaddrinfo(results);
+
+  return sd;
+}
+
 void test_send(struct _node *n){
   // Socket setup
   struct addrinfo hints = {0};

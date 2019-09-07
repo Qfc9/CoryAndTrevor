@@ -18,8 +18,10 @@ int opt_send_library(graph g, char *filename){
   infile = fopen(filename, "r");
 
   /* quit if the file does not exist */
-  if(infile == NULL)
+  if(infile == NULL){
+      printf("ERROR: File could not be found!\n" );
       return 1;
+  }
 
   /* Get the number of bytes */
   fseek(infile, 0L, SEEK_END);

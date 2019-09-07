@@ -16,7 +16,6 @@
 #include <ifaddrs.h>
 #include <netinet/in.h>
 
-#include "util.h"
 #include "../../lib/layout.h"
 #include "listener.h"
 
@@ -159,10 +158,10 @@ void *listener(void *data)
         init_f asdf;
 
         /* open the needed object */
-        handle = dlopen("test", RTLD_NOW);
+        handle = dlopen("./test", RTLD_LOCAL | RTLD_LAZY);
 
         /* find the address of function and data objects */
-        asdf = dlsym(handle, "usage");
+        asdf = dlsym(handle, "test");
 
         /* invoke function, passing value of integer as a parameter */
         asdf();

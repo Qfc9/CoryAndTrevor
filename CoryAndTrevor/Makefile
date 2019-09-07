@@ -1,5 +1,5 @@
 CPPFLAGS += -Wall -Wextra -Wpedantic
-CPPFLAGS += -D_XOPEN_SOURCE -pthread -std=c11 -lm -lc  -DDEBUG -g
+CPPFLAGS += -D_XOPEN_SOURCE -pthread -std=c11 -lm -lc  -DDEBUG -g -ldl
 ARFLAGS += -U
 
 DEBUG = -DDEBUG -g

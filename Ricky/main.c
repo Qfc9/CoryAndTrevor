@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <signal.h>
-#include <strings.h>
+#include <string.h>
 
 #include "lib/graph.h"
 #include "lib/sender.h"
